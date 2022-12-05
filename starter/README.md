@@ -42,11 +42,11 @@ You do **NOT** need to test the Image Service or the Repository, so you should u
 
 Each of the requirements below should be verified by one or more unit tests. All of these test the **Security Service**, so make sure your tests don't depend on the implementation of the Repository or the Image Service. *Remember, you can use ****`Mocks`**** to replace these services in your unit tests.*
 
-You should also write interfaces to describe the necessary behaviors of your dependencies to make them easier to Mock. We’re already using a SecurityRepository interface, but we have no interface to describe the behavior of our Image Service. Create an interface that makes it easy to test our application regardless of whether we’re using the `AwsImageService` or `FakeImageService`. 
+You should also write interfaces to describe the necessary behaviors of your dependencies to make them easier to Mock. We’re already using a SecurityRepository interface, but we have no interface to describe the behavior of our Image Service. Create an interface that makes it easy to test our application regardless of whether we’re using the `com.udacity.catpoint.image.service.AwsImageService` or `com.udacity.catpoint.image.service.FakeImageService`. 
 
 ### *Optional Stand Out Task:* Connect Your Project to the AWS Image Recognition Library
 
-> Once you have created an interface for your image service, complete the steps described in the AwsImageService to create credentials and provide them in a properties file for your application. Change the ImageService implementation class in the CatpointGui class to use the AwsImageService instead of the FakeImageService. Try submitting different types of images and see what comes back!
+> Once you have created an interface for your image service, complete the steps described in the com.udacity.catpoint.image.service.AwsImageService to create credentials and provide them in a properties file for your application. Change the ImageService implementation class in the CatpointGui class to use the com.udacity.catpoint.image.service.AwsImageService instead of the com.udacity.catpoint.image.service.FakeImageService. Try submitting different types of images and see what comes back!
 
 ![Image of the Gui](gui_1.png)
 
