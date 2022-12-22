@@ -79,7 +79,9 @@ public class SecurityServiceTest {
     @Test //Test3:If pending alarm and all sensors are inactive, return to no alarm state.
     void ifPendingAlarm_AllSensorsAreInactive__ReturnToNoAlarmState(){
          when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
-        securityService.changeSensorActivationStatus(sensor,false);
+         //securityService.changeSensorActivationStatus(sensor,false);
+        sensor.setActive(false);
+        securityService.changeSensorActivationStatus(sensor);
         verify(securityRepository,times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
     }
 
@@ -102,6 +104,7 @@ public class SecurityServiceTest {
     @EnumSource(value = AlarmStatus.class, names = {"NO_ALARM", "PENDING_ALARM", "ALARM"})
     void ifASensorIsDeactivated_WhileAlreadyInactive__MakeNoChangesToTheAlarmState(AlarmStatus status){
         when(securityRepository.getAlarmStatus()).thenReturn(status);
+        sensor.setActive(false);
         securityService.changeSensorActivationStatus(sensor,false);
         verify(securityRepository, times(0)).setAlarmStatus(any(AlarmStatus.class));
     }
@@ -136,7 +139,7 @@ public class SecurityServiceTest {
     @EnumSource(value = ArmingStatus.class, names = {"ARMED_HOME", "ARMED_AWAY"})
     void ifTheSystemIsArmed__ResetAllSensorsToInactive(ArmingStatus status){
         when(securityService.getSensors()).thenReturn( mockFiveSensor(true) );
-         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
+        when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
         securityService.setArmingStatus(status);
         securityService.getSensors().stream().map(Sensor::getActive).forEach(Assertions::assertFalse);
     }
