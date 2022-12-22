@@ -13,17 +13,14 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.utils.Pair;
-
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +47,7 @@ public class SecurityServiceTest {
 
     private Function< Boolean,Pair> doesImageContainsCat = shouldBeACat -> Pair.of(imageServiceInterface.imageContainsCat(any(), ArgumentMatchers.anyFloat()),shouldBeACat);
 
-    private final Pair armingStatusArmed = Pair.of(securityRepository.getArmingStatus(),ArmingStatus.ARMED_HOME);
+    private Supplier<Pair> armingStatusArmed = ()-> Pair.of(securityRepository.getArmingStatus(),ArmingStatus.ARMED_HOME);
 
     private Function< Boolean,Pair> mockFiveSensor = isActive -> {
         Set<Sensor> sensors = IntStream.range(1, 5).mapToObj(i -> {
@@ -58,7 +55,7 @@ public class SecurityServiceTest {
             sensor.setActive(isActive);
             return sensor;
         }).collect(Collectors.toSet());
-        return Pair.of(securityRepository.getSensors(),sensors);
+        return Pair.of(securityService.getSensors(),sensors);
     };
 
     // End Of Custom Impl.
@@ -70,19 +67,18 @@ public class SecurityServiceTest {
     void setUp(){
         securityService = new SecurityService(securityRepository, (FakeImageService) imageServiceInterface);
         sensor = getSensor();
-
     }
 
     @Test //Test1:If alarm is armed and a sensor becomes activated, put the system into pending alarm status.
     void ifAlarmIsArmed_SenSorBecomesActivated__PutTheSystemIntoPendingAlarmStatus(){
-        applyWhenThenPairs(armingStatusArmed, alarmSPF.apply(AlarmStatus.NO_ALARM));
+        applyWhenThenPairs(armingStatusArmed.get(), alarmSPF.apply(AlarmStatus.NO_ALARM));
         securityService.changeSensorActivationStatus(sensor,true);
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.PENDING_ALARM);
     }
 
     @Test //Test2:If alarm is armed and a sensor becomes activated and the system is already pending alarm, set the alarm status to alarm.
     void ifAlarmIsArmed_SensorBecomesActivated_SystemIsAlreadyPendingAlarm__SetTheAlarmStatusToAlarmOn() {
-        applyWhenThenPairs(armingStatusArmed, alarmSPF.apply(AlarmStatus.PENDING_ALARM));
+        applyWhenThenPairs(armingStatusArmed.get(), alarmSPF.apply(AlarmStatus.PENDING_ALARM));
         securityService.changeSensorActivationStatus(sensor, true);
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
@@ -119,9 +115,9 @@ public class SecurityServiceTest {
     @Test //Test 7:If the image service identifies an image containing a cat while the system is armed-home, put the system into alarm status.
     void ifTheImageServiceIdentifiesAcat_WhikeTheSystemIsArmed__PutTheSystemIntoAlarmStatus(){
         BufferedImage catImage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
-        applyWhenThenPairs(armingStatusArmed,doesImageContainsCat.apply(true));
+        applyWhenThenPairs(armingStatusArmed.get(),doesImageContainsCat.apply(true));
         securityService.processImage(catImage);
-        verify(securityRepository,atMostOnce()).setAlarmStatus(AlarmStatus.ALARM);
+        verify(securityRepository,times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
     @Test //Test 8:If the image service identifies an image that does not contain a cat, change the status to no alarm as long as the sensors are not active.
@@ -143,7 +139,16 @@ public class SecurityServiceTest {
         securityService.setArmingStatus(status);
         securityService.getSensors().stream().map(Sensor::getActive).forEach(Assertions::assertFalse);
     }
-    
+    @Test //Test 11: If the system is armed-home while the camera shows a cat, set the alarm status to alarm.
+    void ifTheSystemIsArmedHome_WhileTheCameraShowsACat__SetTheAlarmStatusNoAlarm(){
+        BufferedImage catImage = new BufferedImage(256,256,BufferedImage.TYPE_INT_RGB);
+        applyWhenThenPairs(doesImageContainsCat.apply(true));
+        securityService.processImage(catImage);
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+        verify(securityRepository,times(1)).setAlarmStatus(AlarmStatus.ALARM);
+    }
+ 
+
 
 
 }
