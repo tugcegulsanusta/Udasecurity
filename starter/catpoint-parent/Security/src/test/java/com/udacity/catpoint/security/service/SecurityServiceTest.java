@@ -1,6 +1,5 @@
 package com.udacity.catpoint.security.service;
 
-import com.udacity.catpoint.image.service.FakeImageService;
 import com.udacity.catpoint.image.service.ImageServiceInterface;
 import com.udacity.catpoint.security.application.StatusListener;
 import com.udacity.catpoint.security.data.*;
@@ -11,19 +10,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.*;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.utils.Pair;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +35,8 @@ public class SecurityServiceTest {
     //private StatusListener statusListener;
     @Mock
     public SecurityRepository securityRepository;
-
+    @Mock
+    private StatusListener mockListener;
     private Set<Sensor>  mockFiveSensor (boolean isActive ) {
         Set<Sensor> sensors = IntStream.range(1, 5).mapToObj(i -> {
             Sensor sensor = new Sensor("mockSensor_" + i, SensorType.DOOR);
@@ -155,6 +152,18 @@ public class SecurityServiceTest {
         verify(securityRepository,times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
+    // Below this line to support whole method coverage
+    @Test
+    void statusListenerTest4Coverage() {
+        securityService.addStatusListener(mockListener);
+        securityService.removeStatusListener(mockListener);
+    }
+    //Sensor Listener test
+    @Test
+    void sensorTest4Coverage() {
+        securityService.addSensor(sensor);
+        securityService.removeSensor(sensor);
+    }
 
 
 
