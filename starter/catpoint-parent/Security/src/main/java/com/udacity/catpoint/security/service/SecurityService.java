@@ -102,6 +102,8 @@ public class SecurityService {
         switch(securityRepository.getAlarmStatus()) {
             case NO_ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
             case PENDING_ALARM -> setAlarmStatus(AlarmStatus.ALARM);
+            case ALARM -> setAlarmStatus(AlarmStatus.ALARM);
+            default -> throw new IllegalStateException("Unexpected value: " + securityRepository.getAlarmStatus());
         }
     }
 
@@ -112,6 +114,8 @@ public class SecurityService {
         switch(securityRepository.getAlarmStatus()) {
             case PENDING_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
             case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
+            case NO_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
+            default -> throw new IllegalStateException("Unexpected value: " + securityRepository.getAlarmStatus());
         }
     }
 
