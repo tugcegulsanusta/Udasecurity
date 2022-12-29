@@ -19,11 +19,13 @@ public class CatpointGui extends JFrame {
     private transient FakeImageService imageService = new FakeImageService();
     private transient SecurityService securityService = new SecurityService(securityRepository, imageService);
     private DisplayPanel displayPanel = new DisplayPanel(securityService);
-    private ControlPanel controlPanel = new ControlPanel(securityService);
-    private SensorPanel sensorPanel = new SensorPanel(securityService);
+    private final ControlPanel controlPanel;
+    private final SensorPanel sensorPanel;
     private ImagePanel imagePanel = new ImagePanel(securityService);
 
     public CatpointGui() {
+        sensorPanel = new SensorPanel(securityService);
+        controlPanel = new ControlPanel(securityService, sensorPanel);
         setLocation(100, 100);
         setSize(600, 850);
         setTitle("Very Secure App");
