@@ -7,6 +7,7 @@ import com.udacity.catpoint.security.data.ArmingStatus;
 import com.udacity.catpoint.security.data.SecurityRepository;
 import com.udacity.catpoint.security.data.Sensor;
 
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
@@ -163,7 +164,7 @@ public class SecurityService {
     }
 
     public Set<Sensor> getSensors() {
-        return securityRepository.getSensors();
+        return new ConcurrentSkipListSet<>(securityRepository.getSensors());
     }
 
     public void addSensor(Sensor sensor) {
